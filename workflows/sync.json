@@ -149,11 +149,11 @@
           "string": [
             {
               "name": "repo.owner",
-              "value": "n8n-io"
+              "value": "birdgg"
             },
             {
               "name": "repo.name",
-              "value": "n8n-backups"
+              "value": "n8n-workflows"
             },
             {
               "name": "repo.path",
