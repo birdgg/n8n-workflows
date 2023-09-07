@@ -1,0 +1,125 @@
+{
+  "active": true,
+  "connections": {
+    "RSS Feed Read": {
+      "main": [
+        [
+          {
+            "node": "Function",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Feed Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2023-09-06T16:01:28.376Z",
+  "id": "nSkpUCfB17QMpQPx",
+  "name": "New blog to tg",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://birdgg.me/feed"
+      },
+      "name": "RSS Feed Read",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        580
+      ],
+      "id": "162ce341-034d-4915-b905-18c663e53589"
+    },
+    {
+      "parameters": {
+        "functionCode": "/* only return new items */\nconst staticData = getWorkflowStaticData('global');\nconst lastItemId = staticData.lastItemId;\n\nconsole.log('lastItemId', lastItemId);\nconst firstItem = items[0];\nlet newItems = [];\n\nfunction getId(item) {\n  return item.json.guid;\n}\n\nif (lastItemId) {\n  for (const item of items) {\n    if (getId(item) === lastItemId) {\n      break;\n    }\n    newItems.push(item)\n  }\n} else {\n  newItems = [firstItem]\n}\n\nstaticData.lastItemId = getId(firstItem)\nreturn newItems.reverse()"
+      },
+      "name": "Function",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        580
+      ],
+      "id": "4340a1af-8d75-40b2-a830-9901dfb3847c"
+    },
+    {
+      "parameters": {
+        "chatId": "@birdggrecord",
+        "text": "=<a href=\"https://t.me/iv?url={{$node[\"RSS Feed Read\"].json[\"link\"]}}&rhash=72a84540ff6616\">📝</a> {{$node[\"RSS Feed Read\"].json[\"title\"]}} #blog\n\n{{$json[\"contentSnippet\"]}}\n\n{{$node[\"RSS Feed Read\"].json[\"link\"]}}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1740,
+        580
+      ],
+      "id": "abbbf61f-4cd8-4095-adae-20941e50880c",
+      "credentials": {
+        "telegramApi": {
+          "id": "XZKuUNpLdrX2ox4K",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "74be217f-11a5-4a2b-a263-009a2f05aa89",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        580
+      ]
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrencyRules": []
+    },
+    "global": {
+      "lastItemId": "47393-386"
+    }
+  },
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2023-09-07T04:00:03.850Z",
+  "versionId": "4d53fea6-5c5d-466d-8f91-7fccbcb7ce24"
+}
