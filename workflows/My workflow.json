@@ -142,9 +142,13 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "staticData": null,
+  "staticData": {
+    "global": {
+      "lastItemId": "tag:github.com,2008:WatchEvent/31643743148"
+    }
+  },
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2023-09-06T14:33:47.786Z",
+  "updatedAt": "2023-09-07T03:55:47.367Z",
   "versionId": "baee0078-0370-4633-be20-ca9f4fff5d07"
 }
