@@ -1,0 +1,76 @@
+{
+  "active": false,
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2023-09-07T04:29:21.694Z",
+  "id": "79WjXwwjS5Flpsfh",
+  "name": "error_to_tg",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        720
+      ],
+      "id": "6b5ff7bc-d075-4e98-9477-19184c17b092"
+    },
+    {
+      "parameters": {},
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        1160,
+        720
+      ],
+      "id": "190141ce-b83f-4554-be5e-5e97fa5e9cfd"
+    },
+    {
+      "parameters": {
+        "chatId": "@birdggrecord",
+        "text": "=<b>n8n workflow error</b> #n8n-error\n<a href=\"{{$json[\"execution\"][\"url\"]}}\">{{$json[\"workflow\"][\"name\"]}}</a>\n\nError: <code>{{$json[\"execution\"][\"error\"][\"message\"]}}</code>\n<pre><code>{{$json[\"execution\"][\"error\"][\"stack\"]}}</code></pre>",
+        "additionalFields": {
+          "disable_web_page_preview": true,
+          "parse_mode": "HTML"
+        }
+      },
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        720
+      ],
+      "id": "b59c8922-9f72-4735-83b2-4502c9a93f4b",
+      "credentials": {
+        "telegramApi": {
+          "id": "XZKuUNpLdrX2ox4K",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2023-09-07T04:30:47.825Z",
+  "versionId": "afaa8115-fd6b-4d62-89e8-9d1b60feeace"
+}
