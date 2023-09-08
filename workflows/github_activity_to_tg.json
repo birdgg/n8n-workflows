@@ -1,0 +1,154 @@
+{
+  "active": true,
+  "connections": {
+    "RSS Feed Read": {
+      "main": [
+        [
+          {
+            "node": "Function filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interval": {
+      "main": [
+        [
+          {
+            "node": "RSS Feed Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function filter": {
+      "main": [
+        [
+          {
+            "node": "Function",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2023-09-06T14:26:04.093Z",
+  "id": "suYfaa7FjcKbP2fL",
+  "name": "github_activity_to_tg",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "fdf0c26d-abbb-4a2a-98f5-423e0303479d",
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        460,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://github.com/birdgg.atom"
+      },
+      "name": "RSS Feed Read",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        680,
+        580
+      ],
+      "id": "fa4ed30f-5483-4d33-a425-ec8b635d49e4"
+    },
+    {
+      "parameters": {
+        "functionCode": "/* only return new items */\nconst staticData = getWorkflowStaticData('global');\nconst lastItemId = staticData.lastItemId;\n\nconsole.log('lastItemId', lastItemId);\nconst firstItem = items[0];\nlet newItems = [];\n\nfunction getId(item) {\n  return item.json.guid;\n}\n\nif (lastItemId) {\n  for (const item of items) {\n    if (getId(item) === lastItemId) {\n      break;\n    }\n    newItems.push(item)\n  }\n} else {\n  newItems = [firstItem]\n}\n\nstaticData.lastItemId = getId(firstItem)\nreturn newItems.reverse();"
+      },
+      "name": "Function",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        580
+      ],
+      "id": "75ae6568-1b98-405e-9fac-7c79fd5ba1a7"
+    },
+    {
+      "parameters": {
+        "chatId": "@birdggrecord",
+        "text": "={{$json[\"tgTitle\"]}}\n\n{{$json[\"link\"]}}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1180,
+        740
+      ],
+      "id": "9aba6c7a-48b2-40c0-b393-c1ad54847e3a",
+      "credentials": {
+        "telegramApi": {
+          "id": "XZKuUNpLdrX2ox4K",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "interval": 30,
+        "unit": "minutes"
+      },
+      "name": "Interval",
+      "type": "n8n-nodes-base.interval",
+      "typeVersion": 1,
+      "position": [
+        460,
+        740
+      ],
+      "id": "d4623cbf-16f4-499f-b456-31b06c274c94"
+    },
+    {
+      "parameters": {
+        "functionCode": "/* filter items */\nconst newItems = [];\n\nconst regexes = {\n  'star': /^birdgg starred/,\n  'pull-request': /^birdgg opened a pull request/,\n  'issue': /^birdgg opened an issue/,\n}\nconst tagSymbols = {\n  'star': '🌟',\n  'pull-request': '⤴️',\n  'issue': '⚡️'\n}\n\nfor (const item of items) {\n  const title = item.json.title\n  let tag = ''\n\n  for (const key in regexes) {\n    const regex = regexes[key]\n    if (regex.test(title)) {\n      tag = key\n      break\n    }\n  }\n  if (tag !== '') {\n    item.json.tag = tag\n    item.json.tgTitle = `${tagSymbols[tag]} ${title.replace(/^birdgg /, '')} #github #${tag}`\n    item.json.guid = item.json.id\n    newItems.push(item)\n  }\n}\n\nreturn newItems"
+      },
+      "name": "Function filter",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        860,
+        740
+      ],
+      "id": "f0f496df-e6e8-442c-94b3-81fd7cc046bd"
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "global": {
+      "lastItemId": "tag:github.com,2008:WatchEvent/31643743148"
+    }
+  },
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2023-09-08T03:32:33.017Z",
+  "versionId": "6afcd23b-0d06-44ca-8472-53b93bba54d4"
+}
