@@ -1,11 +1,11 @@
 {
   "active": true,
   "connections": {
-    "RSS Feed Read": {
+    "YouTube": {
       "main": [
         [
           {
-            "node": "Function filter",
+            "node": "Function",
             "type": "main",
             "index": 0
           }
@@ -27,18 +27,18 @@
       "main": [
         [
           {
-            "node": "RSS Feed Read",
+            "node": "YouTube",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Function filter": {
+    "Start": {
       "main": [
         [
           {
-            "node": "Function",
+            "node": "YouTube",
             "type": "main",
             "index": 0
           }
@@ -46,51 +46,61 @@
       ]
     }
   },
-  "createdAt": "2023-09-06T14:26:04.093Z",
-  "id": "suYfaa7FjcKbP2fL",
+  "createdAt": "2023-09-20T15:00:22.700Z",
+  "id": "ZfSqkpM6WqxJcu6Q",
   "name": "My workflow",
   "nodes": [
     {
       "parameters": {},
-      "id": "fdf0c26d-abbb-4a2a-98f5-423e0303479d",
+      "id": "4df045aa-941b-49a3-a290-9700e310b2e7",
       "name": "Start",
       "type": "n8n-nodes-base.start",
       "typeVersion": 1,
       "position": [
-        460,
-        460
+        860,
+        280
       ]
     },
     {
       "parameters": {
-        "url": "https://github.com/birdgg.atom"
+        "resource": "playlistItem",
+        "operation": "getAll",
+        "playlistId": "=LL",
+        "limit": 10,
+        "options": {}
       },
-      "name": "RSS Feed Read",
-      "type": "n8n-nodes-base.rssFeedRead",
+      "name": "YouTube",
+      "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
       "position": [
-        680,
-        580
+        1080,
+        420
       ],
-      "id": "fa4ed30f-5483-4d33-a425-ec8b635d49e4"
+      "id": "40aeca8e-301b-402d-b813-44fd3d281211",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "RwrVLdpLatZ6XoZv",
+          "name": "YouTube account"
+        }
+      }
     },
     {
       "parameters": {
-        "functionCode": "/* only return new items */\nconst staticData = getWorkflowStaticData('global');\nconst lastItemId = staticData.lastItemId;\n\nconsole.log('lastItemId', lastItemId);\nconst firstItem = items[0];\nlet newItems = [];\n\nfunction getId(item) {\n  return item.json.guid;\n}\n\nif (lastItemId) {\n  for (const item of items) {\n    if (getId(item) === lastItemId) {\n      break;\n    }\n    newItems.push(item)\n  }\n} else {\n  newItems = [firstItem]\n}\n\nstaticData.lastItemId = getId(firstItem)\nreturn newItems.reverse();"
+        "functionCode": "const staticData = getWorkflowStaticData('global');\nconst lastItemId = staticData.lastItemId;\n\nconsole.log('lastItemId', lastItemId);\nconst firstItem = items[0];\nlet newItems = [];\n\nfunction getId(item) {\n  return item.json.contentDetails.videoId;\n}\n\nif (lastItemId) {\n  for (const item of items) {\n    if (getId(item) === lastItemId) {\n      break;\n    }\n    newItems.push(item)\n  }\n} else {\n  newItems = [firstItem]\n}\n\nstaticData.lastItemId = getId(firstItem)\nreturn newItems.reverse()"
       },
       "name": "Function",
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
       "position": [
-        1020,
-        580
+        1280,
+        420
       ],
-      "id": "75ae6568-1b98-405e-9fac-7c79fd5ba1a7"
+      "id": "207f4f96-fc56-46be-87b6-13a263eee601"
     },
     {
       "parameters": {
         "chatId": "@birdggrecord",
-        "text": "={{$json[\"tgTitle\"]}}\n\n{{$json[\"link\"]}}",
+        "text": "=▶️ {{$json[\"snippet\"][\"title\"]}} #youtube\n\nhttps://www.youtube.com/watch?v={{$json[\"contentDetails\"][\"videoId\"]}}",
         "additionalFields": {
           "parse_mode": "HTML"
         }
@@ -99,10 +109,10 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
       "position": [
-        1180,
-        740
+        1480,
+        420
       ],
-      "id": "9aba6c7a-48b2-40c0-b393-c1ad54847e3a",
+      "id": "008d2713-a026-4158-9ef6-42f943cd514f",
       "credentials": {
         "telegramApi": {
           "id": "XZKuUNpLdrX2ox4K",
@@ -112,30 +122,17 @@
     },
     {
       "parameters": {
-        "interval": 30,
+        "interval": 10,
         "unit": "minutes"
       },
       "name": "Interval",
       "type": "n8n-nodes-base.interval",
       "typeVersion": 1,
       "position": [
-        460,
-        740
-      ],
-      "id": "d4623cbf-16f4-499f-b456-31b06c274c94"
-    },
-    {
-      "parameters": {
-        "functionCode": "/* filter items */\nconst newItems = [];\n\nconst regexes = {\n  'star': /^birdgg starred/,\n  'pull-request': /^birdgg opened a pull request/,\n  'issue': /^birdgg opened an issue/,\n}\nconst tagSymbols = {\n  'star': '🌟',\n  'pull-request': '⤴️',\n  'issue': '⚡️'\n}\n\nfor (const item of items) {\n  const title = item.json.title\n  let tag = ''\n\n  for (const key in regexes) {\n    const regex = regexes[key]\n    if (regex.test(title)) {\n      tag = key\n      break\n    }\n  }\n  if (tag !== '') {\n    item.json.tag = tag\n    item.json.tgTitle = `${tagSymbols[tag]} ${title.replace(/^birdgg /, '')} #github #${tag}`\n    item.json.guid = item.json.id\n    newItems.push(item)\n  }\n}\n\nreturn newItems"
-      },
-      "name": "Function filter",
-      "type": "n8n-nodes-base.function",
-      "typeVersion": 1,
-      "position": [
         860,
-        740
+        620
       ],
-      "id": "f0f496df-e6e8-442c-94b3-81fd7cc046bd"
+      "id": "c6c6c8fb-07c1-4789-a360-8cda3fd22065"
     }
   ],
   "pinData": {},
@@ -144,11 +141,11 @@
   },
   "staticData": {
     "global": {
-      "lastItemId": "tag:github.com,2008:WatchEvent/31643743148"
+      "lastItemId": "MGemhK9t44Q"
     }
   },
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2023-09-07T03:55:47.367Z",
-  "versionId": "baee0078-0370-4633-be20-ca9f4fff5d07"
+  "updatedAt": "2023-09-21T04:00:27.569Z",
+  "versionId": "5b9a5e76-2b7b-46a6-aec4-66758ddf633f"
 }
